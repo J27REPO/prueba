@@ -19,11 +19,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>es.tew</groupId>
-    <artifactId>trabajo-grupo</artifactId>
+    <artifactId>gestioneitor</artifactId>
     <version>1.0-SNAPSHOT</version>
     
     <packaging>war</packaging>
-    <name>trabajo-grupo</name>
+    <name>gestioneitor</name>
     <description>Insert description for your project here.</description>
 
     <properties>
@@ -34,7 +34,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- JBoss dependency versions -->
-        <version.wildfly.maven.plugin>3.0.0.Final</version.wildfly.maven.plugin>
+        <version.wildfly.maven.plugin>5.0.0.Final</version.wildfly.maven.plugin>
 
         <!-- Define the version of the JBoss BOMs we want to import to specify tested stacks. -->
         <version.jboss.bom>27.0.1.Final</version.jboss.bom>
@@ -99,6 +99,27 @@
     </dependencyManagement>
 	
     <dependencies>
+    
+    <dependency> 
+    <groupId>org.primefaces</groupId> 
+    <artifactId>primefaces</artifactId> 
+    <version>14.0.0</version> 
+    <classifier>jakarta</classifier> 
+    </dependency> 
+    
+    <dependency>
+    <groupId>jakarta.el</groupId>
+    <artifactId>jakarta.el-api</artifactId>
+    <version>5.0.0</version>
+    <scope>provided</scope>
+    </dependency>
+
+    <dependency> 
+                    <groupId>org.hsqldb</groupId> 
+                    <artifactId>hsqldb</artifactId> 
+                    <version>2.7.2</version>
+                     
+                </dependency> 
 
         <!-- Import the CDI API, we use provided scope as the API is included in WildFly / JBoss EAP -->
         <dependency>
@@ -211,6 +232,10 @@
                 <groupId>org.wildfly.plugins</groupId>
                 <artifactId>wildfly-maven-plugin</artifactId>
                 <version>${version.wildfly.maven.plugin}</version>
+                <configuration> 
+                    <debug>true</debug> 
+                    <server-args><server-arg>-Djboss.http.port=8090</server-arg></server-args> 
+                </configuration> 
             </plugin>
         </plugins>
     </build>
@@ -230,12 +255,18 @@
                  This profile will start a new WildFly / JBoss EAP instance, and execute the test, shutting it down when done.
                  Run with: mvn clean verify -Parq-managed -->
             <id>arq-managed</id>
-            <dependencies>
+            <dependencies> 
                 <dependency>
                     <groupId>org.wildfly.arquillian</groupId>
                     <artifactId>wildfly-arquillian-container-managed</artifactId>
                     <scope>test</scope>
                 </dependency>
+                <dependency> 
+                    <groupId>jakarta.servlet.jsp.jstl</groupId> 
+                    <artifactId>jakarta.servlet.jsp.jstl-api</artifactId> 
+                    <version>3.0.0</version> 
+                </dependency>
+                                
             </dependencies>
             <build>
                 <plugins>
