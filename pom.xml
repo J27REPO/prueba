@@ -19,11 +19,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>es.tew</groupId>
-    <artifactId>gestioneitor</artifactId>
+    <artifactId>trabajo-grupo</artifactId>
     <version>1.0-SNAPSHOT</version>
     
     <packaging>war</packaging>
-    <name>gestioneitor</name>
+    <name>trabajo-grupo</name>
     <description>Insert description for your project here.</description>
 
     <properties>

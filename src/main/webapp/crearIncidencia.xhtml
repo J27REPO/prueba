@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3d.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>Gestión de Incidencias - Nueva Incidencia</title>
+</h:head>
+
+<h:body>
+    <p:panel header="Crear Nueva Incidencia" style="width: 600px; margin: 50px auto;">
+
+        <h:form id="creacionForm">
+            <p:messages id="messages" showDetail="false" showSummary="true" autoUpdate="true" closable="true" />
+
+            <h:panelGrid columns="2" cellpadding="5" style="width: 100%;">
+                
+                <h:outputLabel value="Solicitante (DNI):" />
+                <h:outputText value="#{incidenciasController.nuevaIncidencia.solicitante.dni}" style="font-weight: bold;"/>
+                
+                <h:outputLabel for="titulo" value="Título:" style="font-weight: bold;"/>
+                <p:inputText id="titulo" 
+                             value="#{incidenciasController.nuevaIncidencia.titulo}" 
+                             required="true" 
+                             requiredMessage="El título es obligatorio" 
+                             maxlength="100"
+                             style="width: 100%;"/>
+                             
+                <h:outputLabel for="categoria" value="Categoría:" style="font-weight: bold;"/>
+                <p:selectOneMenu id="categoria" 
+                                 value="#{incidenciasController.nuevaIncidencia.categoria}" 
+                                 required="true"
+                                 requiredMessage="La categoría es obligatoria">
+                    <f:selectItem itemLabel="Seleccione Categoría" itemValue="" noSelectionOption="true"/>
+                    <f:selectItem itemLabel="Hardware" itemValue="HARDWARE"/>
+                    <f:selectItem itemLabel="Software" itemValue="SOFTWARE"/>
+                    <f:selectItem itemLabel="Redes" itemValue="REDES"/>
+                    <f:selectItem itemLabel="Telefonía" itemValue="TELEFONIA"/>
+                </p:selectOneMenu>
+
+                <h:outputLabel for="descripcion" value="Descripción:" style="font-weight: bold;"/>
+                <p:inputTextarea id="descripcion" 
+                                 value="#{incidenciasController.nuevaIncidencia.descripcion}" 
+                                 required="true" 
+                                 requiredMessage="La descripción es obligatoria" 
+                                 rows="6" 
+                                 cols="50"
+                                 autoResize="false"
+                                 style="width: 100%;"/>
+                                 
+                <h:outputLabel/>
+                <h:outputText/>
+
+            </h:panelGrid>
+
+            <p:separator style="margin-top: 10px; margin-bottom: 20px;"/>
+            
+            <p:commandButton value="Guardar Incidencia" 
+                             action="#{incidenciasController.guardarIncidencia}" 
+                             update="creacionForm"
+                             icon="pi pi-check" 
+                             style="margin-right: 10px;"/>
+                             
+            <p:link outcome="exitoCreacion" value="Cancelar" styleClass="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" immediate="true">
+                </p:link>
+            
+        </h:form>
+    </p:panel>
+</h:body>
+</html>

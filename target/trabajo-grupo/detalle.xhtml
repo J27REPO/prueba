@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets">
+
+<h:head>
+    <title>Detalle de Incidencia</title>
+</h:head>
+
+<h:body>
+    <f:metadata>
+        <f:viewParam name="id" value="#{detalleController.idIncidencia}" required="true"/>
+    </f:metadata>
+
+    <h:form id="detalleForm">
+        <p:messages id="msgs" showDetail="true" autoUpdate="true" closable="true"/>
+
+        <p:panel header="Detalle de Incidencia ID: #{detalleController.incidencia.id}" style="margin-bottom: 20px;">
+            <p:panelGrid columns="4" layout="grid" columnClasses="ui-grid-col-2, ui-grid-col-4, ui-grid-col-2, ui-grid-col-4" style="width: 100%;">
+                
+                <h:outputLabel value="Título:" style="font-weight: bold;"/>
+                <h:outputText value="#{detalleController.incidencia.titulo}"/>
+
+                <h:outputLabel value="Estado Actual:" style="font-weight: bold;"/>
+                <h:outputText value="#{detalleController.incidencia.estado}"/>
+
+                <h:outputLabel value="Solicitante:" style="font-weight: bold;"/>
+                <h:outputText value="#{detalleController.incidencia.solicitante.nombre} #{detalleController.incidencia.solicitante.apellidos}"/>
+
+                <h:outputLabel value="Fecha Creación:" style="font-weight: bold;"/>
+                <h:outputText value="#{detalleController.incidencia.fechaCreacion}">
+                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                </h:outputText>
+
+                <h:outputLabel value="Técnico Asignado:" style="font-weight: bold;"/>
+                <h:outputText value="#{detalleController.incidencia.tecnico != null ? detalleController.incidencia.tecnico.nombre : 'Pendiente de Asignar'}"/>
+                
+                <h:outputLabel value="Categoría:" style="font-weight: bold;"/>
+                <h:outputText value="#{detalleController.incidencia.categoria}"/>
+
+                <h:outputLabel value="Descripción:" style="font-weight: bold;"/>
+                <h:outputText value="#{detalleController.incidencia.descripcion}" style="white-space: pre-line;" colspan="3"/>
+                
+            </p:panelGrid>
+        </p:panel>
+        
+        <p:panel header="Acciones de Técnico / Administrador" 
+                 rendered="#{sesionController.isAdmin() or sesionController.isTecnico()}" 
+                 style="margin-bottom: 20px;">
+
+            <h:panelGrid columns="3" cellpadding="5">
+                <h:outputLabel for="estado" value="Cambiar Estado:"/>
+                <p:selectOneMenu id="estado" 
+                                 value="#{detalleController.incidencia.estado}" 
+                                 style="width:150px">
+                    <f:selectItems value="#{detalleController.estadosDisponibles}" var="e" itemLabel="#{e}" itemValue="#{e}"/>
+                </p:selectOneMenu>
+                <h:outputText/>
+
+                <h:outputLabel for="tecnico" value="Reasignar Técnico:"/>
+                <p:selectOneMenu id="tecnico" 
+                                 value="#{detalleController.incidencia.tecnico}" 
+                                 converter="usuarioConverter" 
+                                 style="width:250px">
+                    <f:selectItem itemLabel="Sin Asignar" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItems value="#{detalleController.tecnicosDisponibles}" var="t" 
+                                   itemLabel="#{t.nombre} #{t.apellidos} (#{t.dni})" itemValue="#{t}"/>
+                </p:selectOneMenu>
+                <p:commandButton value="Guardar Cambios" 
+                                 action="#{detalleController.guardarCambios}" 
+                                 update="detalleForm :historialPanel :comentariosPanel"
+                                 icon="pi pi-save"/>
+            </h:panelGrid>
+        </p:panel>
+
+        <p:tabView>
+            
+            <p:tab title="Comentarios (#{detalleController.comentarios.size()})" id="comentariosPanel">
+                
+                <p:dataTable var="com" value="#{detalleController.comentarios}" emptyMessage="Esta incidencia no tiene comentarios.">
+                    <p:column headerText="Fecha" width="150">
+                        <h:outputText value="#{com.fecha}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Autor" width="200">
+                        <h:outputText value="#{com.autor.nombre} (#{com.autor.rol})"/>
+                    </p:column>
+                    <p:column headerText="Comentario">
+                        <h:outputText value="#{com.texto}" style="white-space: pre-line;"/>
+                    </p:column>
+                </p:dataTable>
+                
+                <p:separator/>
+                
+                <p:panel header="Añadir Comentario" style="margin-top: 15px;">
+                    <h:panelGrid columns="1" style="width: 100%;">
+                        <p:inputTextarea value="#{detalleController.nuevoComentario.texto}" 
+                                         rows="3" cols="80" 
+                                         placeholder="Escribe tu comentario aquí..." 
+                                         required="true" 
+                                         requiredMessage="El comentario no puede estar vacío"/>
+                        <p:commandButton value="Publicar Comentario" 
+                                         action="#{detalleController.addComentario}" 
+                                         update="@parent :detalleForm:comentariosPanel"
+                                         icon="pi pi-comment"/>
+                    </h:panelGrid>
+                </p:panel>
+            </p:tab>
+
+            <p:tab title="Historial de Estados (#{detalleController.historial.size()})" id="historialPanel">
+                <p:dataTable var="hist" value="#{detalleController.historial}" emptyMessage="No hay registros de cambios de estado.">
+                    <p:column headerText="Fecha Cambio" width="150">
+                        <h:outputText value="#{hist.fechaCambio}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="Usuario" width="200">
+                        <h:outputText value="#{hist.usuario != null ? hist.usuario.nombre : 'Sistema'}" />
+                    </p:column>
+                    <p:column headerText="Estado Anterior" width="150">
+                        <h:outputText value="#{hist.estadoAnterior != null ? hist.estadoAnterior : '---'}"/>
+                    </p:column>
+                    <p:column headerText="Estado Nuevo">
+                        <h:outputText value="#{hist.estadoNuevo}" style="font-weight: bold;"/>
+                    </p:column>
+                </p:dataTable>
+            </p:tab>
+
+        </p:tabView>
+        
+        <p:commandLink action="exitoCreacion?faces-redirect=true" value="Volver al Listado" style="margin-top: 20px; display: block;"/>
+
+    </h:form>
+    
+    <f:converter>
+        <f:converterId>jakarta.faces.GenericObject</f:converterId>
+        <f:className>jakarta.faces.convert.StringConverter</f:className> 
+        </f:converter>
+    
+</h:body>
+</html>
