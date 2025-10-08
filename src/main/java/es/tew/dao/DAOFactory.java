@@ -15,36 +15,46 @@ import java.util.Properties;
 public abstract class DAOFactory {
 
     private static final String DRIVER = "org.hsqldb.jdbcDriver";
-    private static final String URL = "jdbc:hsqldb:file:./data/LocalDB";
+    // MODIFICADO: Usar BDD en memoria para evitar problemas de ruta/permisos
+    private static final String URL = "jdbc:hsqldb:mem:incidenciasDB";
     private static final String USER = "SA";
     private static final String PASSWORD = "";
     
     private static Connection connection = null;
 
     /**
-     * Inicializa la factoría y la conexión de la base de datos.
-     * Se llama al inicio de la aplicación para asegurar que el driver está cargado 
-     * y el script inicial de la BDD se ejecuta si es necesario.
+     * Lógica de inicialización de la conexión y carga de datos.
+     * Se llama al inicio de la aplicación y cada vez que la conexión se cierra.
      */
-    static {
+    private static void initializeDatabase() {
         try {
             // 1. Cargar el driver
             Class.forName(DRIVER);
 
-            // 2. Establecer la conexión
+            // 2. Establecer la conexión (recrea la DB en memoria si ya se había cerrado)
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
             
-            // 3. Ejecutar el script de inicialización si la BDD está vacía.
-            // Esto es crucial para HSQLDB en modo archivo.
+            // 3. Ejecutar el script de inicialización para cargar datos.
             executeScript("data/LocalDB.script");
+            
+            System.out.println("INFO: Base de datos HSQLDB inicializada/reinicializada con éxito.");
             
         } catch (ClassNotFoundException e) {
             System.err.println("ERROR: No se pudo cargar el driver de HSQLDB. ¿Falta el JAR en el pom.xml?");
             e.printStackTrace();
+            connection = null; 
         } catch (SQLException e) {
             System.err.println("ERROR al conectar con la base de datos o ejecutar el script inicial.");
             e.printStackTrace();
+            connection = null;
         }
+    }
+
+    /**
+     * Inicializa la factoría al inicio del deploy.
+     */
+    static {
+        initializeDatabase();
     }
 
     /**
@@ -73,7 +83,6 @@ public abstract class DAOFactory {
                         stmt.execute(trimmedStatement);
                     }
                 }
-                System.out.println("INFO: Script de base de datos ejecutado con éxito.");
             }
         } catch (IOException e) {
             System.err.println("ERROR: No se pudo leer el script de BDD.");
@@ -82,31 +91,33 @@ public abstract class DAOFactory {
     }
 
     /**
-     * Proporciona la conexión JDBC a los DAOs.
+     * Proporciona la conexión JDBC a los DAOs, reinicializando la DB si se ha cerrado.
      * @return La conexión JDBC.
      */
     public static Connection getConnection() {
+        try {
+            // Lógica de resiliencia: Comprueba si la conexión es nula o ha sido cerrada
+            if (connection == null || connection.isClosed()) {
+                System.out.println("ADVERTENCIA: Conexión HSQLDB cerrada/nula. Reinicializando DB...");
+                initializeDatabase(); // Recrea la DB y recarga los datos
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al verificar el estado de la conexión: " + e.getMessage());
+            e.printStackTrace();
+        }
         return connection;
     }
     
     public abstract IncidenciaDAO getIncidenciaDAO();
     public abstract ComentarioDAO getComentarioDAO();
     public abstract HistorialEstadoDAO getHistorialEstadoDAO();
-    // **********************************************
-    // Métodos abstractos para obtener los DAOs
-    // **********************************************
 
     public abstract UsuarioDAO getUsuarioDAO();
     
-    // public abstract IncidenciaDAO getIncidenciaDAO();
-    // public abstract ComentarioDAO getComentarioDAO();
-    // public abstract HistorialEstadoDAO getHistorialEstadoDAO();
-
     /**
      * Obtiene la instancia de la Factoría. Por ahora, solo tendremos una implementación.
      */
     public static DAOFactory getFactory() {
-        // Devuelve la implementación concreta de la factoría.
         return new JdbcDAOFactory();
     }
 }

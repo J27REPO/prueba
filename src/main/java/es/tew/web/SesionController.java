@@ -48,8 +48,8 @@ public String login() {
         this.dni = null;
         this.password = null;
 
-        // Retornar la cadena de éxito
-        return "exitoLogin"; 
+        // MODIFICADO: Redirección forzada para asegurar la navegación a listado.xhtml
+        return "listado?faces-redirect=true"; 
     } else {
         // 4. Autenticación fallida: AÑADIR MENSAJE DE ERROR A JSF
         
@@ -59,7 +59,7 @@ public String login() {
         );
         
         // Retornar NULL o "" para permanecer en la misma página y mostrar el mensaje
-        return null; // El outcome "errorLogin" es innecesario si añades el FacesMessage
+        return null; 
     }
 }
 
