@@ -56,7 +56,7 @@ public interface IncidenciaDAO {
      * Guarda una nueva incidencia. El ID debe ser generado por la base de datos.
      * @param incidencia IncidenciaDTO a guardar.
      */
-    void save(IncidenciaDTO incidencia);
+    IncidenciaDTO save(IncidenciaDTO incidencia);
 
     /**
      * Actualiza una incidencia existente.

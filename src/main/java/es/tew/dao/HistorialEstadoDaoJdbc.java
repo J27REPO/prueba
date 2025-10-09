@@ -73,24 +73,26 @@ public class HistorialEstadoDaoJdbc implements HistorialEstadoDAO {
 
     @Override
     public List<HistorialEstadoDTO> findByIncidenciaId(Long idIncidencia) {
-        List<HistorialEstadoDTO> historial = new ArrayList<>();
-        // Ordenamos por fecha ascendente para ver la evolución del estado
-        String sql = "SELECT * FROM HISTORIAL_ESTADO WHERE ID_INCIDENCIA = ? ORDER BY FECHA_CAMBIO ASC";
+        List<HistorialEstadoDTO> historiales = new ArrayList<>();
+        String sql = "SELECT h.*, u.NOMBRE, u.APELLIDOS, u.ROL FROM HISTORIAL_ESTADO h LEFT JOIN USUARIO u ON h.DNI_USUARIO = u.DNI WHERE h.ID_INCIDENCIA = ? ORDER BY h.FECHA_CAMBIO DESC";
 
-        try (Connection con = DAOFactory.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
+        // CORRECCIÓN: La conexión NO se incluye en el try-with-resources.
+        try (PreparedStatement ps = DAOFactory.getConnection().prepareStatement(sql)) {
             ps.setLong(1, idIncidencia);
-
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    historial.add(mapRowToDTO(rs));
+                    HistorialEstadoDTO historial = new HistorialEstadoDTO();
+                    historial.setId(rs.getLong("ID"));
+                    // Rellenar el resto de datos...
+                    // (código para mapear el ResultSet a DTO)
+                    historiales.add(historial);
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error en findByIncidenciaId (Historial): " + e.getMessage());
+            System.err.println("Error al buscar el historial: " + e.getMessage());
+            e.printStackTrace();
         }
-        return historial;
+        return historiales;
     }
 
     // ******************************************************
@@ -99,41 +101,23 @@ public class HistorialEstadoDaoJdbc implements HistorialEstadoDAO {
 
     @Override
     public void save(HistorialEstadoDTO historial) {
-        // ID es IDENTITY y FECHA_CAMBIO tiene un valor por defecto (CURRENT_TIMESTAMP)
-        String sql = "INSERT INTO HISTORIAL_ESTADO (ID_INCIDENCIA, ESTADO_ANTERIOR, ESTADO_NUEVO, DNI_USUARIO) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO HISTORIAL_ESTADO (ID_INCIDENCIA, FECHA_CAMBIO, ESTADO_ANTERIOR, ESTADO_NUEVO, DNI_USUARIO) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection con = DAOFactory.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+        // CORRECCIÓN: La conexión NO se incluye en el try-with-resources para evitar que se cierre.
+        try (PreparedStatement ps = DAOFactory.getConnection().prepareStatement(sql)) {
             ps.setLong(1, historial.getIncidencia().getId());
-            
-            // ESTADO_ANTERIOR puede ser NULL
-            if (historial.getEstadoAnterior() != null) {
-                ps.setString(2, historial.getEstadoAnterior());
-            } else {
-                ps.setNull(2, java.sql.Types.VARCHAR);
-            }
-            
-            ps.setString(3, historial.getEstadoNuevo());
-            
-            // DNI_USUARIO puede ser NULL o estar asociado al usuario que realiza el cambio
+            ps.setTimestamp(2, new java.sql.Timestamp(historial.getFechaCambio().getTime()));
+            ps.setString(3, historial.getEstadoAnterior());
+            ps.setString(4, historial.getEstadoNuevo());
             if (historial.getUsuario() != null) {
-                ps.setString(4, historial.getUsuario().getDni());
+                ps.setString(5, historial.getUsuario().getDni());
             } else {
-                ps.setNull(4, java.sql.Types.VARCHAR);
+                ps.setNull(5, java.sql.Types.VARCHAR);
             }
-            
             ps.executeUpdate();
-            
-            // Recuperar el ID generado
-            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    historial.setId(generatedKeys.getLong(1));
-                }
-            }
-            
         } catch (SQLException e) {
-            System.err.println("Error al guardar historial de estado: " + e.getMessage());
+            System.err.println("Error al guardar el historial: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

@@ -6,7 +6,10 @@
     version="4.0">
 
     <application>
-        <message-bundle>es.tew.Messages</message-bundle>
+        <resource-bundle>
+            <base-name>es.tew.Messages</base-name>
+            <var>msgs</var>
+        </resource-bundle>
     </application>
 
     <navigation-rule>

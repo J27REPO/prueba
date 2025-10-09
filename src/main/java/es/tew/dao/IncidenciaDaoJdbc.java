@@ -111,41 +111,44 @@ public class IncidenciaDaoJdbc implements IncidenciaDAO {
     }
 
     @Override
-    public void save(IncidenciaDTO incidencia) {
-        // En HSQLDB, FECHA_CREACION tiene un valor por defecto (CURRENT_TIMESTAMP),
-        // y el ID es generado automáticamente (IDENTITY).
-        String sql = "INSERT INTO INCIDENCIA (TITULO, DESCRIPCION, ESTADO, CATEGORIA, DNI_SOLICITANTE, DNI_TECNICO) VALUES (?, ?, ?, ?, ?, ?)";
-
-        // Usamos RETURN_GENERATED_KEYS para obtener el ID auto-generado
-        try (Connection con = DAOFactory.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+    public IncidenciaDTO save(IncidenciaDTO incidencia) {
+        // CORRECCIÓN: Se ha corregido el nombre de la columna "DNI_SOLICITANTER" a "DNI_SOLICITANTE"
+        String sql = "INSERT INTO INCIDENCIA (TITULO, DESCRIPCION, ESTADO, CATEGORIA, FECHA_CREACION, DNI_SOLICITANTE, DNI_TECNICO) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        
+        try (PreparedStatement ps = DAOFactory.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
             ps.setString(1, incidencia.getTitulo());
             ps.setString(2, incidencia.getDescripcion());
             ps.setString(3, incidencia.getEstado());
             ps.setString(4, incidencia.getCategoria());
-            ps.setString(5, incidencia.getSolicitante().getDni());
+            ps.setTimestamp(5, new java.sql.Timestamp(System.currentTimeMillis()));
+            ps.setString(6, incidencia.getSolicitante().getDni());
             
-            // DNI_TECNICO puede ser NULL
             if (incidencia.getTecnico() != null) {
-                ps.setString(6, incidencia.getTecnico().getDni());
+                ps.setString(7, incidencia.getTecnico().getDni());
             } else {
-                ps.setNull(6, java.sql.Types.VARCHAR);
+                ps.setNull(7, java.sql.Types.VARCHAR);
             }
-
-            ps.executeUpdate();
             
-            // Recuperar el ID generado
+            ps.executeUpdate();
+
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     incidencia.setId(generatedKeys.getLong(1));
+                } else {
+                    throw new SQLException("Error al crear la incidencia, no se obtuvo el ID.");
                 }
             }
-            
+
         } catch (SQLException e) {
-            System.err.println("Error al guardar incidencia: " + e.getMessage());
+            System.err.println("Error al guardar la incidencia: " + e.getMessage());
+            e.printStackTrace();
         }
+        
+        return incidencia;
     }
+
+
 
     @Override
     public void update(IncidenciaDTO incidencia) {

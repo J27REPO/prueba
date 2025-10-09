@@ -5,152 +5,79 @@ import es.tew.dto.HistorialEstadoDTO;
 import es.tew.dto.IncidenciaDTO;
 import es.tew.dto.UsuarioDTO;
 import es.tew.logica.ServicioIncidencias;
-
 import jakarta.annotation.PostConstruct;
-import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import jakarta.faces.view.ViewScoped; // Requiere dependencia de JSF/CDI más reciente (Jakarta EE)
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Managed Bean encargado de la vista de detalle de una incidencia específica.
- * Gestiona la carga de la incidencia, comentarios, historial, y las acciones de técnico.
- */
 @Named("detalleController")
 @ViewScoped
 public class DetalleController implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // Inyección de Componentes
-    @Inject
-    private SesionController sesionController;
     @Inject
     private ServicioIncidencias servicioIncidencias;
 
-    // Propiedades de la Incidencia (ID cargado por parámetro de vista)
+    @Inject
+    private SesionController sesionController;
+
     private Long idIncidencia;
     private IncidenciaDTO incidencia;
-
-    // Listas de datos relacionados
     private List<ComentarioDTO> comentarios;
     private List<HistorialEstadoDTO> historial;
-    private List<UsuarioDTO> tecnicosDisponibles;
-
-    // Propiedades para formularios
     private ComentarioDTO nuevoComentario;
-    
-    // Propiedades para el dropdown de Estados
-    private List<String> estadosDisponibles = Arrays.asList("Abierta", "Asignada", "En Proceso", "Cerrada");
+    private List<UsuarioDTO> tecnicosDisponibles;
+    private final List<String> estadosDisponibles = Arrays.asList("ABIERTA", "EN_PROCESO", "RESUELTA", "CERRADA");
 
-
-    /**
-     * Método de inicialización llamado automáticamente después de la inyección de dependencias.
-     * Se usa para cargar los datos si el ID está presente.
-     */
     @PostConstruct
     public void init() {
-        // Inicializar el objeto para nuevo comentario
         nuevoComentario = new ComentarioDTO();
-        
-        // Cargar los técnicos disponibles para el dropdown de reasignación
-        tecnicosDisponibles = servicioIncidencias.getTecnicos();
-        
-        // La carga de la incidencia y sus datos se delega a un método de carga 
-        // que debería ser llamado por la vista (ej. con <f:viewParam> en JSF) o por init.
-        // Lo simplificaremos asumiendo que el setter de idIncidencia lo dispara.
     }
-    
-    // **********************************************
-    // 1. Métodos de Carga (Invocados por la Vista o el Setter)
-    // **********************************************
 
     /**
-     * Setter usado por <f:viewParam> en la página XHTML para pasar el ID.
-     */
-    public void setIdIncidencia(Long idIncidencia) {
-        this.idIncidencia = idIncidencia;
-        cargarIncidencia();
-        cargarComentariosYHistorial();
-    }
-    
-    /**
-     * Carga la incidencia y las listas relacionadas.
+     * PUNTO CLAVE 3: Este método se invoca desde la vista para cargar los datos.
      */
     public void cargarIncidencia() {
         if (idIncidencia != null) {
-            this.incidencia = servicioIncidencias.getIncidenciaById(idIncidencia);
+            this.incidencia = servicioIncidencias.findIncidenciaById(idIncidencia);
+            if (this.incidencia != null) {
+                this.comentarios = servicioIncidencias.findComentariosByIncidenciaId(idIncidencia);
+                this.historial = servicioIncidencias.findHistorialByIncidenciaId(idIncidencia);
+                this.tecnicosDisponibles = servicioIncidencias.getTecnicos();
+            }
+        }
+    }
+
+    public void addComentario() {
+        if (nuevoComentario != null && nuevoComentario.getTexto() != null && !nuevoComentario.getTexto().trim().isEmpty()) {
+            nuevoComentario.setAutor(sesionController.getUsuarioActual());
+            nuevoComentario.setIncidencia(incidencia);
+            servicioIncidencias.addComentario(nuevoComentario);
+            this.comentarios = servicioIncidencias.findComentariosByIncidenciaId(idIncidencia);
+            this.nuevoComentario = new ComentarioDTO();
         }
     }
     
-    private void cargarComentariosYHistorial() {
-        if (idIncidencia != null) {
-            this.comentarios = servicioIncidencias.getComentariosIncidencia(idIncidencia);
-            this.historial = servicioIncidencias.getHistorialIncidencia(idIncidencia);
+    public void guardarCambios() {
+        if (incidencia != null) {
+            servicioIncidencias.updateIncidencia(incidencia, sesionController.getUsuarioActual());
+            this.historial = servicioIncidencias.findHistorialByIncidenciaId(idIncidencia);
         }
     }
-
-    // **********************************************
-    // 2. Lógica de Comentarios
-    // **********************************************
-
-    /**
-     * Acción para añadir un nuevo comentario.
-     */
-    public void addComentario() {
-        if (nuevoComentario.getTexto() == null || nuevoComentario.getTexto().trim().isEmpty()) {
-            return; // No hacer nada si el comentario está vacío
-        }
-        
-        // Vincular el comentario a la incidencia y al autor actual
-        nuevoComentario.setIncidencia(this.incidencia);
-        nuevoComentario.setAutor(sesionController.getUsuarioActual());
-        
-        // Guardar en la capa de lógica
-        servicioIncidencias.addComentario(nuevoComentario);
-        
-        // Recargar listas y limpiar el formulario
-        cargarComentariosYHistorial();
-        nuevoComentario = new ComentarioDTO(); // Limpiar para el siguiente comentario
-    }
-
-    // **********************************************
-    // 3. Lógica de Modificación (Técnicos/Admin)
-    // **********************************************
-
-    /**
-     * Acción para guardar los cambios de estado o reasignación.
-     */
-    public String guardarCambios() {
-        if (incidencia == null) return null;
-
-        // La incidencia ya tiene los valores actualizados del formulario (estado, técnico)
-        
-        // La lógica de negocio se encargará de:
-        // 1. Comparar el estado actual y el anterior.
-        // 2. Insertar el registro en HISTORIAL_ESTADO si el estado cambió.
-        // 3. Actualizar la tabla INCIDENCIA.
-        servicioIncidencias.actualizarIncidencia(this.incidencia, sesionController.getUsuarioActual());
-        
-        // Recargar listas para mostrar el historial y los nuevos datos
-        cargarComentariosYHistorial();
-        
-        // Permanecer en la vista de detalle
-        return null; 
-    }
-
-    // **********************************************
-    // 4. Getters y Setters
-    // **********************************************
+    
+    // --- GETTERS Y SETTERS ---
 
     public Long getIdIncidencia() {
         return idIncidencia;
     }
-    
-    // (El setter setIdIncidencia() está arriba con la lógica de carga)
+
+    public void setIdIncidencia(Long idIncidencia) {
+        this.idIncidencia = idIncidencia;
+    }
 
     public IncidenciaDTO getIncidencia() {
         return incidencia;

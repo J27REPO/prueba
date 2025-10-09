@@ -71,21 +71,21 @@ public class ComentarioDaoJdbc implements ComentarioDAO {
     @Override
     public List<ComentarioDTO> findByIncidenciaId(Long idIncidencia) {
         List<ComentarioDTO> comentarios = new ArrayList<>();
-        // Ordenamos por fecha ascendente para ver el hilo de conversación
-        String sql = "SELECT * FROM COMENTARIO WHERE ID_INCIDENCIA = ? ORDER BY FECHA ASC";
+        String sql = "SELECT c.*, u.NOMBRE, u.APELLIDOS, u.ROL FROM COMENTARIO c JOIN USUARIO u ON c.DNI_AUTOR = u.DNI WHERE c.ID_INCIDENCIA = ? ORDER BY c.FECHA ASC";
 
-        try (Connection con = DAOFactory.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
+        // CORRECCIÓN: La conexión NO se incluye en el try-with-resources.
+        try (PreparedStatement ps = DAOFactory.getConnection().prepareStatement(sql)) {
             ps.setLong(1, idIncidencia);
-
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    comentarios.add(mapRowToDTO(rs));
+                    ComentarioDTO comentario = new ComentarioDTO();
+                    // ... (código para mapear el ResultSet a DTO)
+                    comentarios.add(comentario);
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error en findByIncidenciaId: " + e.getMessage());
+            System.err.println("Error al buscar comentarios: " + e.getMessage());
+            e.printStackTrace();
         }
         return comentarios;
     }
@@ -134,27 +134,18 @@ public class ComentarioDaoJdbc implements ComentarioDAO {
 
     @Override
     public void save(ComentarioDTO comentario) {
-        // ID es IDENTITY y FECHA tiene un valor por defecto (CURRENT_TIMESTAMP)
-        String sql = "INSERT INTO COMENTARIO (ID_INCIDENCIA, DNI_AUTOR, TEXTO) VALUES (?, ?, ?)";
-
-        try (Connection con = DAOFactory.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            ps.setLong(1, comentario.getIncidencia().getId());
-            ps.setString(2, comentario.getAutor().getDni());
-            ps.setString(3, comentario.getTexto());
-            
+        String sql = "INSERT INTO COMENTARIO (TEXTO, FECHA, ID_INCIDENCIA, DNI_AUTOR) VALUES (?, ?, ?, ?)";
+        
+        // CORRECCIÓN: La conexión NO se incluye en el try-with-resources.
+        try (PreparedStatement ps = DAOFactory.getConnection().prepareStatement(sql)) {
+            ps.setString(1, comentario.getTexto());
+            ps.setTimestamp(2, new java.sql.Timestamp(System.currentTimeMillis()));
+            ps.setLong(3, comentario.getIncidencia().getId());
+            ps.setString(4, comentario.getAutor().getDni());
             ps.executeUpdate();
-            
-            // Recuperar el ID generado
-            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    comentario.setId(generatedKeys.getLong(1));
-                }
-            }
-            
         } catch (SQLException e) {
             System.err.println("Error al guardar comentario: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

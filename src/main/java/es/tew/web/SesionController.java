@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 
 import java.io.Serializable;
@@ -68,10 +69,15 @@ public String login() {
      * @return String de navegación (outcome)
      */
     public String logout() {
-        this.usuarioActual = null;
-        // En una aplicación real, se debería invalidar la sesión HTTP.
-        return "exitoLogout?faces-redirect=true"; // Redirección fuerte
-    }
+    // 1. Obtener el contexto externo de JSF
+    ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+    
+    // 2. Invalidar la sesión HTTP actual. Esto destruye el bean de sesión.
+    ec.invalidateSession();
+    
+    // 3. Redirigir directamente a la página de login.
+    return "/login.xhtml?faces-redirect=true";
+}
 
     // **********************************************
     // Métodos de control de seguridad (para usar en las páginas XHTML)
