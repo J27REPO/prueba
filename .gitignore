@@ -10,6 +10,8 @@
 # Log file
 *.log
 
+#ruta de target
+target/
 # BlueJ files
 *.ctxt
 
