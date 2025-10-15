@@ -4,7 +4,9 @@
 ### Java ###
 # Compiled class file
 *.class
-
+# Archivos de lista y paquetes WAR
+*.lst
+*.war
 # Log file
 *.log
 
