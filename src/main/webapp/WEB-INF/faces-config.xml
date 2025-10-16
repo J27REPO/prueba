@@ -54,4 +54,29 @@
         </navigation-case>
     </navigation-rule>
 
+
+ <navigation-rule>
+        <from-view-id>/login.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-outcome>correcto</from-outcome>
+            <to-view-id>/correcto.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>usuario</from-outcome>
+            <to-view-id>/correcto.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>tecnico</from-outcome>
+            <to-view-id>/correcto.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>Administrador</from-outcome>
+            <to-view-id>/correcto.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
 </faces-config>
