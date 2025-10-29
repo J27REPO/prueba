@@ -1,66 +1,71 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets">
 
-<h:head>
-    <title>Gestión de Incidencias - Listado</title>
-</h:head>
-
-<h:body>
-    <p:growl id="growl" showDetail="true" sticky="false" life="3000"/>
-
-    <h:form>
-        <p:panel header="Bienvenido, #{sesionController.usuarioActual.nombre}" style="margin-bottom: 20px;">
-            <h:outputText value="Rol: #{sesionController.usuarioActual.rol}" style="margin-right: 20px;"/>
-            <p:commandLink action="#{sesionController.logout}" value="Cerrar Sesión" style="float: right;" immediate="true"/>
-            <p:commandButton value="Nueva Incidencia" 
-                             action="#{incidenciasController.initCreacion}" 
-                             style="margin-left: 10px;"
-                             rendered="#{sesionController.isUsuarioNormal() or sesionController.isAdmin()}"/>
-        </p:panel>
-    </h:form>
+<ui:composition template="/WEB-INF/templates/template.xhtml">
     
-    <p:panel header="Listado de Incidencias">
+    <ui:define name="titulo">
+        #{msg['listado.titulo']}
+    </ui:define>
+    
+    <ui:define name="contenido">
         <h:form>
-            <p:dataTable var="inc" 
-                         value="#{incidenciasController.listaIncidencias}" 
-                         emptyMessage="No hay incidencias que mostrar para su rol."
-                         paginator="true" rows="10"
-                         style="width: 100%;">
-                <p:column headerText="ID" width="50" sortBy="#{inc.id}">
-                    <h:outputText value="#{inc.id}" />
-                </p:column>
-                <p:column headerText="Título" sortBy="#{inc.titulo}">
-                    <h:outputText value="#{inc.titulo}" />
-                </p:column>
-                <p:column headerText="Estado" width="100" sortBy="#{inc.estado}">
-                    <h:outputText value="#{inc.estado}" />
-                </p:column>
-                <p:column headerText="Categoría" width="100" sortBy="#{inc.categoria}">
-                    <h:outputText value="#{inc.categoria}" />
-                </p:column>
-                <p:column headerText="Solicitante" width="150" sortBy="#{inc.solicitante.apellidos}">
-                    <h:outputText value="#{inc.solicitante.nombre} #{inc.solicitante.apellidos}" />
-                </p:column>
-                <p:column headerText="Técnico Asignado" width="150" sortBy="#{inc.tecnico.apellidos}">
-                    <h:outputText value="#{inc.tecnico != null ? inc.tecnico.nombre : 'Pendiente'}" />
-                </p:column>
-                <p:column headerText="Fecha Creación" width="100" sortBy="#{inc.fechaCreacion}">
-                    <h:outputText value="#{inc.fechaCreacion}">
-                        <f:convertDateTime pattern="dd/MM/yyyy" />
-                    </h:outputText>
-                </p:column>
-                <p:column headerText="Acciones">
-                    <h:link outcome="detalle" value="Ver Detalle">
-                        <f:param name="id" value="#{inc.id}" />
-                    </h:link>
-                </p:column>
-            </p:dataTable>
+            <p:panel header="#{msg['listado.titulo']}">
+                <p:commandButton value="#{msg['menu.nuevaIncidencia']}"
+                               action="#{incidenciasController.initCreacion}"
+                               icon="pi pi-plus"
+                               styleClass="ui-button-success"
+                               rendered="#{sesionController.isUsuarioNormal() or sesionController.isAdmin()}"
+                               style="margin-bottom: 15px;"/>
+                
+                <p:dataTable var="inc"
+                           value="#{incidenciasController.listaIncidencias}"
+                           emptyMessage="#{msg['listado.sinIncidencias']}"
+                           paginator="true" rows="10">
+                    
+                    <p:column headerText="#{msg['listado.id']}" width="50" sortBy="#{inc.id}">
+                        <h:outputText value="#{inc.id}"/>
+                    </p:column>
+                    
+                    <p:column headerText="#{msg['listado.titulo.col']}" sortBy="#{inc.titulo}">
+                        <h:outputText value="#{inc.titulo}"/>
+                    </p:column>
+                    
+                    <p:column headerText="#{msg['listado.estado']}" width="120" sortBy="#{inc.estado}">
+                        <h:outputText value="#{msg['estado.'.concat(inc.estado)]}" 
+                                    styleClass="badge badge-#{inc.estado}"/>
+                    </p:column>
+                    
+                    <p:column headerText="#{msg['listado.categoria']}" width="100" sortBy="#{inc.categoria}">
+                        <h:outputText value="#{msg['categoria.'.concat(inc.categoria)]}"/>
+                    </p:column>
+                    
+                    <p:column headerText="#{msg['listado.solicitante']}" width="150" sortBy="#{inc.solicitante.apellidos}">
+                        <h:outputText value="#{inc.solicitante.nombre} #{inc.solicitante.apellidos}"/>
+                    </p:column>
+                    
+                    <p:column headerText="#{msg['listado.tecnico']}" width="150" sortBy="#{inc.tecnico.apellidos}">
+                        <h:outputText value="#{inc.tecnico != null ? inc.tecnico.nombre : msg['listado.pendiente']}"/>
+                    </p:column>
+                    
+                    <p:column headerText="#{msg['listado.fechaCreacion']}" width="100" sortBy="#{inc.fechaCreacion}">
+                        <h:outputText value="#{inc.fechaCreacion}">
+                            <f:convertDateTime pattern="#{msg['fecha.formatoCorto']}"/>
+                        </h:outputText>
+                    </p:column>
+                    
+                    <p:column headerText="#{msg['listado.acciones']}">
+                        <h:link outcome="detalle" value="#{msg['listado.verDetalle']}" styleClass="btn-link">
+                            <f:param name="id" value="#{inc.id}"/>
+                        </h:link>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
         </h:form>
-    </p:panel>
-</h:body>
+    </ui:define>
+    
+</ui:composition>
 </html>

@@ -1,21 +1,29 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="jakarta.faces.html"
-      xmlns:f="jakarta.faces.core"
-      xmlns:p="http://primefaces.org/ui">
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:h="jakarta.faces.html"
+        xmlns:f="jakarta.faces.core"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:ui="jakarta.faces.facelets">
 
+    <f:metadata>
+        <f:viewParam name="id" value="#{detalleController.idIncidencia}" required="true" />
+        <f:viewAction action="#{detalleController.cargarIncidencia}" />
+    </f:metadata>
 <h:head>
     <title>Detalle de Incidencia</title>
 </h:head>
 
 <h:body>
-    <f:metadata>
-        <f:viewParam name="id" value="#{detalleController.idIncidencia}" required="true" />
-        <f:viewAction action="#{detalleController.cargarIncidencia}" />
-    </f:metadata>
+    <!-- Growl de notificaciones -->
+    <p:growl id="growl" showDetail="true" sticky="false" life="3000"/>
 
+    <!-- Menú dinámico según rol -->
+    <h:form>
+        <ui:include src="#{sesionController.isAdmin() ? '/templates/menu_admin.xhtml' : 
+                          sesionController.isTecnico() ? '/templates/menu_tecnico.xhtml' : 
+                          '/templates/menu_usuario.xhtml'}" />
+    </h:form>
+
+    <!-- Formulario principal -->
     <h:form id="detalleForm">
         <p:messages id="msgs" showDetail="true" autoUpdate="true" closable="true"/>
 
@@ -100,7 +108,8 @@
                 </p:dataTable>
             </p:tab>
         </p:tabView>
+        
         <p:commandLink action="/listado?faces-redirect=true" value="Volver al Listado" style="margin-top: 20px; display: block;"/>
     </h:form>
 </h:body>
-</html>
+</f:view>

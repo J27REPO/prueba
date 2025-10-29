@@ -1,0 +1,67 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+    xmlns:p="http://primefaces.org/ui" xmlns:ui="jakarta.faces.facelets">
+
+<h:head>
+    <title>Dar de Alta Nuevo Usuario</title>
+</h:head>
+
+<h:body>
+    <h:form id="formCrearUsuario">
+
+        <!-- Menú dinámico según rol -->
+        <ui:include
+            src="#{sesionController.isAdmin() ? '/templates/menu_admin.xhtml' : '/templates/menu_usuario.xhtml'}" />
+
+        <p:panel header="Dar de Alta Nuevo Usuario" style="margin-bottom: 20px;">
+            <p:messages id="msgs" showDetail="true" autoUpdate="true" closable="true" />
+
+            <p:panelGrid columns="2" layout="grid" columnClasses="ui-grid-col-2, ui-grid-col-10">
+
+                <h:outputLabel for="nombre" value="Nombre:" />
+                <p:inputText id="nombre" value="#{usuarioController.nuevoEmpleado.nombre}" required="true"
+                    requiredMessage="El nombre es obligatorio" style="width:100%;" />
+
+                <h:outputLabel for="apellidos" value="Apellidos:" />
+                <p:inputText id="apellidos" value="#{usuarioController.nuevoEmpleado.apellidos}" required="true"
+                    requiredMessage="Los apellidos son obligatorios" style="width:100%;" />
+
+                <h:outputLabel for="dni" value="DNI:" />
+                <p:inputText id="dni" value="#{usuarioController.nuevoEmpleado.dni}" required="true"
+                    requiredMessage="El DNI es obligatorio">
+                    <f:validateRegex pattern="^\d{8}[A-Za-z]$" />
+                </p:inputText>
+
+
+                <h:outputLabel for="rol" value="Rol:" />
+                <p:selectOneMenu id="rol" value="#{usuarioController.nuevoEmpleado.rol}" required="true"
+                    requiredMessage="El rol es obligatorio" style="width:100%;">
+                    <f:selectItem itemLabel="Seleccione un rol" itemValue="" noSelectionOption="true" />
+                    <f:selectItem itemLabel="Usuario" itemValue="Usuario" />
+                    <f:selectItem itemLabel="Técnico" itemValue="Tecnico" />
+                </p:selectOneMenu>
+
+            </p:panelGrid>
+
+            <div style="margin-top: 15px;">
+                <p:commandButton value="Crear Empleado" 
+                action="#{usuarioController.guardarEmpleado}"
+                update="msgs" icon="pi pi-check" 
+                style="margin-right: 10px;" />
+
+
+                <p:button value="Cancelar" outcome="/listado.xhtml" icon="pi pi-times"
+                    styleClass="ui-button-secondary" />
+            </div>
+        </p:panel>
+
+        <!-- Panel para mostrar la contraseña generada -->
+        <h:panelGroup id="panelPassword" rendered="#{not empty usuarioController.nuevoEmpleado.password}">
+            <p:messages id="PASSWDMsg" showDetail="true" autoUpdate="true" closable="true" />
+            <h:outputText value="Contraseña generada:" style="font-weight:bold; margin-right:5px;" />
+            <h:outputText value="#{usuarioController.nuevoEmpleado.password}" style="color:blue;" />
+        </h:panelGroup>
+
+    </h:form>
+</h:body>
+
+</html>

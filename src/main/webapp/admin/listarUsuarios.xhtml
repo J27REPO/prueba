@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/template.xhtml">
+    
+    <ui:define name="titulo">
+        #{msg['usuarios.titulo']}
+    </ui:define>
+    
+    <ui:define name="contenido">
+        
+        <h:form>
+            <p:panel header="#{msg['usuarios.titulo']}" style="margin-bottom: 20px;">
+                
+                <p:commandButton value="#{msg['menu.altaUsuario']}" 
+                               action="#{adminController.iniciarAltaUsuario}" 
+                               icon="pi pi-user-plus"
+                               styleClass="ui-button-success"
+                               style="margin-bottom: 15px;"/>
+                
+                <p:dataTable var="usuario" 
+                           value="#{adminController.todosUsuarios}" 
+                           emptyMessage="#{msg['usuarios.sinUsuarios']}"
+                           paginator="true" 
+                           rows="15"
+                           style="width: 100%;">
+                    
+                    <p:column headerText="#{msg['usuarios.dni']}" width="100" sortBy="#{usuario.dni}">
+                        <h:outputText value="#{usuario.dni}"/>
+                    </p:column>
+                    
+                    <p:column headerText="#{msg['usuarios.nombre']}" sortBy="#{usuario.nombre}">
+                        <h:outputText value="#{usuario.nombre}"/>
+                    </p:column>
+                    
+                    <p:column headerText="#{msg['usuarios.apellidos']}" sortBy="#{usuario.apellidos}">
+                        <h:outputText value="#{usuario.apellidos}"/>
+                    </p:column>
+                    
+                    <p:column headerText="#{msg['usuarios.rol']}" width="150" sortBy="#{usuario.rol}">
+                        <h:outputText value="#{msg['rol.'.concat(usuario.rol)]}" 
+                                    styleClass="badge badge-role-#{usuario.rol}"/>
+                    </p:column>
+                    
+                </p:dataTable>
+                
+            </p:panel>
+        </h:form>
+        
+    </ui:define>
+    
+</ui:composition>
+</html>

@@ -14,6 +14,7 @@ public interface UsuarioDAO {
     
     // Operaciones CRUD básicas
     UsuarioDTO findByDni(String dni);
+    List<UsuarioDTO> findByRol(String rol);
     List<UsuarioDTO> findAll();
     void save(UsuarioDTO usuario);
     void update(UsuarioDTO usuario);

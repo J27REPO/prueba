@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets">
+
+<h:head>
+    <title><ui:insert name="titulo">#{msg['app.titulo']}</ui:insert></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <h:outputStylesheet name="css/styles.css"/>
+</h:head>
+
+<h:body>
+    <f:view locale="#{localeController.locale}">
+        <!-- BARRA SUPERIOR -->
+        <div class="top-bar">
+            <h:form styleClass="top-bar-content">
+                <div class="app-title">
+                    <i class="pi pi-ticket"/> #{msg['app.titulo']}
+                </div>
+                
+                <!-- SELECTOR DE IDIOMA -->
+                <div class="language-selector">
+                    <p:commandLink action="#{localeController.cambiarAEspanol}" 
+                                   update="@all" 
+                                   styleClass="#{localeController.language == 'es' ? 'active-lang' : ''}">
+                        <i class="pi pi-flag"/> ES
+                    </p:commandLink>
+                    <span class="separator">|</span>
+                    <p:commandLink action="#{localeController.cambiarAIngles}" 
+                                   update="@all"
+                                   styleClass="#{localeController.language == 'en' ? 'active-lang' : ''}">
+                        <i class="pi pi-flag"/> EN
+                    </p:commandLink>
+                </div>
+                
+                <!-- INFO USUARIO Y LOGOUT -->
+                <div class="user-info" rendered="#{sesionController.isLogged()}">
+                    <span class="welcome-text">
+                        #{msg['app.bienvenida']}, #{sesionController.usuarioActual.nombre}
+                        <span class="user-role">(#{msg['rol.'.concat(sesionController.usuarioActual.rol)]})</span>
+                    </span>
+                    <p:commandLink action="#{sesionController.logout}" 
+                                   styleClass="logout-link"
+                                   immediate="true">
+                        <i class="pi pi-sign-out"/> #{msg['menu.salir']}
+                    </p:commandLink>
+                </div>
+            </h:form>
+        </div>
+
+        <!-- MENÚ DE NAVEGACIÓN -->
+        <ui:insert name="menu">
+            <ui:include src="/WEB-INF/templates/menu.xhtml"/>
+        </ui:insert>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="main-content">
+            <p:messages id="messages" showDetail="true" closable="true" autoUpdate="true"/>
+            
+            <div class="content-wrapper">
+                <ui:insert name="contenido">
+                    <!-- Aquí va el contenido específico de cada página -->
+                </ui:insert>
+            </div>
+        </div>
+
+        <!-- PIE DE PÁGINA -->
+        <div class="footer">
+            <p>© 2025 - #{msg['app.titulo']} - Universidad de Oviedo</p>
+        </div>
+    </f:view>
+</h:body>
+</html>

@@ -4,7 +4,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets">
 
 <h:head>
     <title>Nueva Incidencia</title>
@@ -12,6 +13,11 @@
 
 <h:body>
     <h:form>
+        <!-- Menú dinámico según rol -->
+        <ui:include src="#{sesionController.isAdmin() ? '/templates/menu_admin.xhtml' : 
+                          sesionController.isTecnico() ? '/templates/menu_tecnico.xhtml' : 
+                          '/templates/menu_usuario.xhtml'}" />
+
         <p:panel header="Crear Nueva Incidencia" style="margin-bottom: 20px;">
             <p:messages id="msgs" showDetail="true" autoUpdate="true" closable="true"/>
 
@@ -25,10 +31,9 @@
 
                 <h:outputLabel for="categoria" value="Categoría:"/>
                 <p:selectOneMenu id="categoria" value="#{incidenciasController.nuevaIncidencia.categoria}">
-                    <f:selectItem itemLabel="Hardware" itemValue="Hardware"/>
-                    <f:selectItem itemLabel="Software" itemValue="Software"/>
-                    <f:selectItem itemLabel="Red" itemValue="Red"/>
-                    <f:selectItem itemLabel="Otro" itemValue="Otro"/>
+                    <f:selectItem itemLabel="Internet" itemValue="Internet"/>
+                    <f:selectItem itemLabel="Telefonía" itemValue="Telefonía"/>
+                    <f:selectItem itemLabel="Ordenador" itemValue="Ordenador"/>
                 </p:selectOneMenu>
                 
                 <h:outputLabel for="descripcion" value="Descripción:"/>

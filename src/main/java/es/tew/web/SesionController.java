@@ -1,21 +1,15 @@
 package es.tew.web;
 
+import java.io.Serializable;
+
 import es.tew.dto.UsuarioDTO;
 import es.tew.logica.ServicioIncidencias;
-
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
-
-import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * Managed Bean encargado de la gestión de la Sesión del usuario y el
@@ -23,13 +17,12 @@ import java.sql.SQLException;
  * Scope: SessionScoped, para que la instancia persista durante la sesión del
  * usuario.
  */
-@Named("sesionController") // Nombre del bean en EL (Expression Language)
+@Named("sesionController")
 @SessionScoped
 public class SesionController implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // Inyección de Dependencias: Acceso a la capa de lógica de negocio
     @Inject
     private ServicioIncidencias servicioIncidencias;
 
@@ -46,105 +39,54 @@ public class SesionController implements Serializable {
      * @return String de navegación (outcome)
      */
     public String login() {
-        // 1. Llamar a la capa de lógica para verificar las credenciales
+        // VALIDACIÓN BÁSICA
+        if (!validarDNI(dni)) {
+            FacesContext.getCurrentInstance().addMessage(
+                null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error de acceso", "El DNI introducido no es válido."));
+            return null;
+        }
+
+        // AUTENTICACIÓN A TRAVÉS DEL SERVICIO
         UsuarioDTO user = servicioIncidencias.login(dni, password);
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        String role = null;
+
         if (user != null) {
-            if (validador(dni)) {
-                try {
- 
-                    // 1. Conectar a la base de datos
-                    conn = DriverManager.getConnection("jdbc:hsqldb:hsql://localhost/localDB", "sa", "");
-                    System.out.println("hola\n ");
-                    // 2. Consulta para obtener el usuario por DNI
-                    String sql = "SELECT PASSWD, ROL FROM USUARIO WHERE DNI = ?";
-                    stmt = conn.prepareStatement(sql);
-                    stmt.setString(1, dni);
-                    rs = stmt.executeQuery();
-
-                    if (rs.next()) {
-                        String storedPassword = rs.getString("PASSWD");
-                        role = rs.getString("ROL");
-                        System.out.println("contraseña: " + storedPassword +"\n");
-                        // 3. Verificar contraseña
-                        if (storedPassword.equals(password)) {
-                            // Credenciales correctas
-                            System.out.println("Role devuelto por servicio: " + role);
-                            return role;
-                             // Coinciden
-                        } else {
-                            // Contraseña incorrecta, devuelve el rol
-                            return null;
-                        }
-                    } else {
-                        // DNI no existe en la base de datos
-                        return null;
-                    }
-
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    return null;
-                } finally {
-                    // 4. Cerrar recursos
-                    try {
-                        if (rs != null)
-                            rs.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        if (stmt != null)
-                            stmt.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        if (conn != null)
-                            conn.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-
-            // 2. Autenticación exitosa
+            // Autenticación exitosa
             this.usuarioActual = user;
-
-            // 3. Limpiar campos
+            
+            // Limpiar campos
             this.dni = null;
             this.password = null;
-
-            // MODIFICADO: Redirección forzada para asegurar la navegación a listado.xhtml
+            
+            // Redirección forzada a listado
             return "listado?faces-redirect=true";
         } else {
-            // 4. Autenticación fallida: AÑADIR MENSAJE DE ERROR A JSF
-
+            // Autenticación fallida
             FacesContext.getCurrentInstance().addMessage(
-                    null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error de acceso", "DNI o contraseña incorrectos."));
-
-            // Retornar NULL o "" para permanecer en la misma página y mostrar el mensaje
+                null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error de acceso", "DNI o contraseña incorrectos."));
             return null;
         }
     }
 
-    private boolean validador(String dni2) {
-        if (dni2 == null || dni2.length() != 9) {
-            return false; // Invalid length
+    /**
+     * Valida el formato del DNI español.
+     * @param dni DNI a validar
+     * @return true si es válido, false en caso contrario
+     */
+    private boolean validarDNI(String dni) {
+        if (dni == null || dni.length() != 9) {
+            return false;
         }
 
-        String numberPart = dni2.substring(0, 8);
-        char letterPart = Character.toUpperCase(dni2.charAt(8));
+        String numberPart = dni.substring(0, 8);
+        char letterPart = Character.toUpperCase(dni.charAt(8));
 
         if (!numberPart.matches("\\d+")) {
-            return false; // First 8 characters must be digits
+            return false;
         }
 
-        // Spanish DNI letter calculation
+        // Cálculo de la letra del DNI español
         String letters = "TRWAGMYFPDXBNJZSQVHLCKE";
         int number = Integer.parseInt(numberPart);
         char correctLetter = letters.charAt(number % 23);
@@ -158,18 +100,13 @@ public class SesionController implements Serializable {
      * @return String de navegación (outcome)
      */
     public String logout() {
-        // 1. Obtener el contexto externo de JSF
         ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-
-        // 2. Invalidar la sesión HTTP actual. Esto destruye el bean de sesión.
         ec.invalidateSession();
-
-        // 3. Redirigir directamente a la página de login.
         return "/login.xhtml?faces-redirect=true";
     }
 
     // **********************************************
-    // Métodos de control de seguridad (para usar en las páginas XHTML)
+    // Métodos de control de seguridad
     // **********************************************
 
     public boolean isLogged() {
@@ -211,4 +148,11 @@ public class SesionController implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
+    public void setUsuarioActual(UsuarioDTO usuarioActual) {
+    this.usuarioActual = usuarioActual;
+    if (usuarioActual != null) {
+        FacesContext.getCurrentInstance().getExternalContext()
+            .getSessionMap().put("usuarioActual", usuarioActual);
+    }
+}
 }

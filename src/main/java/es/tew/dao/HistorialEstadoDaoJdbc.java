@@ -3,12 +3,9 @@ package es.tew.dao;
 import es.tew.dto.HistorialEstadoDTO;
 import es.tew.dto.IncidenciaDTO;
 import es.tew.dto.UsuarioDTO;
-
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 

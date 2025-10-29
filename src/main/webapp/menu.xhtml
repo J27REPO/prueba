@@ -1,0 +1,59 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="jakarta.faces.facelets">
+
+    <h:form rendered="#{sesionController.isLogged()}" styleClass="navigation-menu">
+        <p:menubar>
+            
+            <!-- INICIO (Todos los roles) -->
+            <p:menuitem value="#{msg['menu.inicio']}" 
+                        icon="pi pi-home" 
+                        outcome="/listado.xhtml"/>
+
+            <!-- OPCIONES PARA USUARIO NORMAL -->
+            <p:submenu label="#{msg['menu.misIncidencias']}" 
+                       icon="pi pi-list"
+                       rendered="#{sesionController.isUsuarioNormal()}">
+                <p:menuitem value="#{msg['menu.misIncidencias']}" 
+                            icon="pi pi-list" 
+                            outcome="/listado.xhtml"/>
+                <p:menuitem value="#{msg['menu.nuevaIncidencia']}" 
+                            icon="pi pi-plus" 
+                            action="#{incidenciasController.initCreacion}"/>
+            </p:submenu>
+
+            <!-- OPCIONES PARA TÉCNICO -->
+            <p:menuitem value="#{msg['menu.incidenciasAsignadas']}" 
+                        icon="pi pi-briefcase" 
+                        outcome="/listado.xhtml"
+                        rendered="#{sesionController.isTecnico()}"/>
+
+            <!-- OPCIONES PARA ADMINISTRADOR -->
+            <p:submenu label="#{msg['menu.todasIncidencias']}" 
+                       icon="pi pi-chart-line"
+                       rendered="#{sesionController.isAdmin()}">
+                <p:menuitem value="#{msg['menu.todasIncidencias']}" 
+                            icon="pi pi-list" 
+                            outcome="/admin/todasIncidencias.xhtml"/>
+                <p:menuitem value="#{msg['menu.estadisticas']}" 
+                            icon="pi pi-chart-bar" 
+                            outcome="/admin/estadisticas.xhtml"/>
+            </p:submenu>
+
+            <p:submenu label="#{msg['menu.usuarios']}" 
+                       icon="pi pi-users"
+                       rendered="#{sesionController.isAdmin()}">
+                <p:menuitem value="#{msg['menu.usuarios']}" 
+                            icon="pi pi-users" 
+                            outcome="/admin/listarUsuarios.xhtml"/>
+                <p:menuitem value="#{msg['menu.altaUsuario']}" 
+                            icon="pi pi-user-plus" 
+                            action="#{adminController.iniciarAltaUsuario}"/>
+            </p:submenu>
+
+        </p:menubar>
+    </h:form>
+
+</ui:composition>

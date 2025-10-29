@@ -1,7 +1,9 @@
 package es.tew.dao;
 
 import java.util.List;
+
 import es.tew.dto.IncidenciaDTO;
+import es.tew.dto.UsuarioDTO;
 
 /**
  * Interfaz de Acceso a Datos (DAO) para la entidad Incidencia.
@@ -69,4 +71,6 @@ public interface IncidenciaDAO {
      * @param id ID de la incidencia a eliminar.
      */
     void delete(Long id);
+    
+    List<UsuarioDTO> findByRol(String rol);
 }

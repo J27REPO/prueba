@@ -1,5 +1,9 @@
 package es.tew.web;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+
 import es.tew.dto.ComentarioDTO;
 import es.tew.dto.HistorialEstadoDTO;
 import es.tew.dto.IncidenciaDTO;
@@ -9,9 +13,6 @@ import jakarta.annotation.PostConstruct;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
 
 @Named("detalleController")
 @ViewScoped
@@ -31,8 +32,7 @@ public class DetalleController implements Serializable {
     private List<HistorialEstadoDTO> historial;
     private ComentarioDTO nuevoComentario;
     private List<UsuarioDTO> tecnicosDisponibles;
-    private final List<String> estadosDisponibles = Arrays.asList("ABIERTA", "EN_PROCESO", "RESUELTA", "CERRADA");
-
+    private final List<String> estadosDisponibles = Arrays.asList("EN_PROCESO", "PENDIENTE_USUARIO", "CERRADA");    
     @PostConstruct
     public void init() {
         nuevoComentario = new ComentarioDTO();

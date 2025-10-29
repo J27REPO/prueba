@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/WEB-INF/templates/template.xhtml">
+    
+    <ui:define name="titulo">
+        #{msg['alta.titulo']}
+    </ui:define>
+    
+    <ui:define name="contenido">
+        
+        <h:form id="formAlta">
+            <p:panel header="#{msg['alta.titulo']}" style="margin-bottom: 20px; max-width: 600px; margin: 0 auto;">
+                
+                <p:messages id="msgs" showDetail="true" autoUpdate="true" closable="true"/>
+                
+                <!-- MOSTRAR CONTRASEÑA GENERADA -->
+                <p:dialog header="#{msg['alta.passwordGenerada']}" 
+                         widgetVar="dlgPassword" 
+                         modal="true" 
+                         visible="#{adminController.mostrarPassword}"
+                         width="400">
+                    <p:panel styleClass="password-panel">
+                        <h:panelGrid columns="2" cellpadding="5">
+                            <h:outputText value="#{msg['alta.passwordGenerada']}:" style="font-weight: bold;"/>
+                            <h:outputText value="#{adminController.passwordGenerada}" 
+                                        style="font-size: 18px; color: #d32f2f; font-weight: bold;"/>
+                        </h:panelGrid>
+                        <p style="margin-top: 10px; color: #ff6b6b;">
+                            <i class="pi pi-exclamation-triangle"/> #{msg['alta.passwordInfo']}
+                        </p>
+                        <p:commandButton value="#{msg['nueva.cancelar']}" 
+                                       action="listarUsuarios" 
+                                       icon="pi pi-check"
+                                       style="margin-top: 10px;"/>
+                    </p:panel>
+                </p:dialog>
+                
+                <!-- FORMULARIO DE ALTA -->
+                <p:panelGrid columns="2" layout="grid" columnClasses="ui-grid-col-4, ui-grid-col-8">
+                    
+                    <h:outputLabel for="nombre" value="#{msg['alta.nombre']}:"/>
+                    <p:inputText id="nombre" 
+                               value="#{adminController.nuevoUsuario.nombre}" 
+                               required="true" 
+                               requiredMessage="#{msg['alta.nombreRequerido']}" 
+                               style="width: 100%;"/>
+                    
+                    <h:outputLabel for="apellidos" value="#{msg['alta.apellidos']}:"/>
+                    <p:inputText id="apellidos" 
+                               value="#{adminController.nuevoUsuario.apellidos}" 
+                               required="true" 
+                               requiredMessage="#{msg['alta.apellidosRequeridos']}" 
+                               style="width: 100%;"/>
+                    
+                    <h:outputLabel for="dni" value="#{msg['alta.dni']}:"/>
+                    <p:inputText id="dni" 
+                               value="#{adminController.nuevoUsuario.dni}" 
+                               required="true" 
+                               requiredMessage="#{msg['alta.dniRequerido']}" 
+                               style="width: 100%;"
+                               maxlength="9">
+                        <f:validateRegex pattern="^\d{8}[A-Za-z]$" 
+                                       for="dni"/>
+                    </p:inputText>
+                    
+                    <h:outputLabel for="rol" value="#{msg['alta.rol']}:"/>
+                    <p:selectOneMenu id="rol" 
+                                   value="#{adminController.nuevoUsuario.rol}" 
+                                   required="true"
+                                   requiredMessage="#{msg['alta.rolRequerido']}"
+                                   style="width: 100%;">
+                        <f:selectItem itemLabel="#{msg['filtro.seleccionar']}" itemValue="" noSelectionOption="true"/>
+                        <f:selectItems value="#{adminController.rolesDisponibles}" 
+                                      var="r" 
+                                      itemLabel="#{msg['rol.'.concat(r)]}" 
+                                      itemValue="#{r}"/>
+                    </p:selectOneMenu>
+                    
+                </p:panelGrid>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <p:commandButton value="#{msg['alta.crear']}" 
+                                   action="#{adminController.altaUsuario}" 
+                                   update="@form"
+                                   icon="pi pi-save"
+                                   styleClass="ui-button-success"/>
+                    
+                    <p:button value="#{msg['nueva.cancelar']}" 
+                            outcome="/admin/listarUsuarios.xhtml" 
+                            icon="pi pi-times"
+                            style="margin-left: 10px;"/>
+                </div>
+                
+            </p:panel>
+        </h:form>
+        
+    </ui:define>
+    
+</ui:composition>
+</html>

@@ -1,0 +1,57 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<h:head>
+    <title>Gestión de Usuarios - Usuarios</title>
+</h:head>
+
+<h:body>
+    <!-- Growl de notificaciones -->
+    <p:growl id="growl" showDetail="true" sticky="false" life="3000"/>
+
+    <!-- Menú dinámico según rol -->
+    <h:form>
+        <ui:include src="#{sesionController.isAdmin() ? '/templates/menu_admin.xhtml' : 
+                  sesionController.isTecnico() ? '/templates/menu_tecnico.xhtml' : 
+                  '/templates/menu_usuario.xhtml'}" />
+    </h:form>
+
+    <!-- Panel de listado de usuarios -->
+    <p:panel header="Listado de Usuarios">
+        <h:form>
+            <p:dataTable var="usr" 
+                         value="#{usuarioController.listaUsuarios}"
+                         emptyMessage="No hay usuarios que mostrar"
+                         paginator="true" rows="10"
+                         style="width: 100%;">
+
+                <p:column headerText="DNI" width="120" sortBy="#{usr.dni}">
+                    <h:outputText value="#{usr.dni}" />
+                </p:column>
+
+                <p:column headerText="Nombre" sortBy="#{usr.nombre}">
+                    <h:outputText value="#{usr.nombre}" />
+                </p:column>
+
+                <p:column headerText="Apellidos" sortBy="#{usr.apellidos}">
+                    <h:outputText value="#{usr.apellidos}" />
+                </p:column>
+
+                <p:column headerText="Rol" width="120" sortBy="#{usr.rol}">
+                    <h:outputText value="#{usr.rol}" />
+                </p:column>
+
+                <p:column headerText="Acciones" width="120">
+                    <h:link outcome="detalleUsuario" value="Ver Detalle">
+                        <f:param name="dni" value="#{usr.dni}" />
+                    </h:link>
+                </p:column>
+
+            </p:dataTable>
+        </h:form>
+    </p:panel>
+</h:body>
+</html>

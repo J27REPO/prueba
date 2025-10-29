@@ -143,4 +143,26 @@ public class UsuarioDaoJdbc implements UsuarioDAO {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public List<UsuarioDTO> findByRol(String rol) {
+        List<UsuarioDTO> usuarios = new ArrayList<>();
+        String sql = "SELECT * FROM USUARIO WHERE ROL = ?";
+    
+        try (PreparedStatement ps = DAOFactory.getConnection().prepareStatement(sql)) {
+            ps.setString(1, rol);
+    
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) { // recorremos todas las filas
+                    usuarios.add(mapRowToDTO(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error en findByRol: " + e.getMessage());
+            e.printStackTrace();
+        }
+    
+        return usuarios; // devolvemos lista vacía si no hay resultados
+    }
+    
 }

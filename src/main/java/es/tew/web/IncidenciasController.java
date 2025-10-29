@@ -42,6 +42,7 @@ public class IncidenciasController implements Serializable {
     
     public String guardarIncidencia() {
         // Asignamos el usuario actual como solicitante antes de guardar
+        System.out.println("Guardando incidencia para el usuario: " + sesionController.getUsuarioActual().getNombre());
         nuevaIncidencia.setSolicitante(sesionController.getUsuarioActual());
         servicioIncidencias.crearIncidencia(nuevaIncidencia);
         

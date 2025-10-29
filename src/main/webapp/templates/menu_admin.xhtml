@@ -1,0 +1,23 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://jakarta.faces.org/ui">
+    <p:menubar   style="width:100%;" autoDisplay="true">
+        <p:menuitem value="Listar todas las incidencias" 
+                    outcome="listado" 
+                    icon="pi pi-list" />
+        <p:menuitem value="Dar de alta nuevos usuarios" 
+                    outcome="crearUsuario" 
+                    icon="pi pi-user-plus" />
+        <p:menuitem value="Listar usuarios" 
+                    outcome="listadoUsuarios" 
+                    icon="pi pi-users" />
+        <p:menuitem value="Consultar estadísticas" 
+                    outcome="listado" 
+                    icon="pi pi-chart-bar" />
+        <p:menuitem value="Cerrar sesión" 
+                    action="#{sesionController.logout}" 
+                    icon="pi pi-sign-out" />
+    </p:menubar>
+</ui:composition>

@@ -5,40 +5,52 @@
         https://jakarta.ee/xml/ns/jakartaee/web-facesconfig_4_0.xsd"
     version="4.0">
 
+    <!-- CONFIGURACIÓN DE INTERNACIONALIZACIÓN -->
     <application>
+        <!-- Archivo de mensajes base -->
         <resource-bundle>
             <base-name>es.tew.Messages</base-name>
-            <var>msgs</var>
+            <var>msg</var>
         </resource-bundle>
+        
+        <!-- Locales soportados -->
+        <locale-config>
+            <default-locale>es</default-locale>
+            <supported-locale>es</supported-locale>
+            <supported-locale>en</supported-locale>
+        </locale-config>
     </application>
 
+    <!-- REGLAS DE NAVEGACIÓN -->
+    
+    <!-- Navegación desde login -->
     <navigation-rule>
         <from-view-id>/login.xhtml</from-view-id>
         
         <navigation-case>
-            <from-outcome>exitoLogin</from-outcome>
+            <from-outcome>listado</from-outcome>
             <to-view-id>/listado.xhtml</to-view-id>
             <redirect/>
         </navigation-case>
-        
-        <navigation-case>
-            <from-outcome>errorLogin</from-outcome>
-            <to-view-id>/login.xhtml</to-view-id>
-        </navigation-case>
     </navigation-rule>
 
+    <!-- Navegación general (logout) -->
     <navigation-rule>
-        <from-view-id>*</from-view-id> <navigation-case>
-            <from-outcome>exitoLogout</from-outcome>
+        <from-view-id>*</from-view-id>
+        
+        <navigation-case>
+            <from-outcome>login</from-outcome>
             <to-view-id>/login.xhtml</to-view-id>
             <redirect/>
         </navigation-case>
     </navigation-rule>
-        <navigation-rule>
+    
+    <!-- Navegación desde listado -->
+    <navigation-rule>
         <from-view-id>/listado.xhtml</from-view-id>
         
         <navigation-case>
-            <from-outcome>detalleIncidencia</from-outcome>
+            <from-outcome>detalle</from-outcome>
             <to-view-id>/detalle.xhtml</to-view-id>
         </navigation-case>
         
@@ -46,36 +58,31 @@
             <from-outcome>crearIncidencia</from-outcome>
             <to-view-id>/crearIncidencia.xhtml</to-view-id>
         </navigation-case>
+    </navigation-rule>
+    
+    <!-- Navegación funcionalidades admin -->
+    <navigation-rule>
+        <from-view-id>*</from-view-id>
         
         <navigation-case>
-            <from-outcome>exitoCreacion</from-outcome>
-            <to-view-id>/listado.xhtml</to-view-id>
+            <from-outcome>altaUsuario</from-outcome>
+            <to-view-id>/admin/altaUsuario.xhtml</to-view-id>
+        </navigation-case>
+        
+        <navigation-case>
+            <from-outcome>listarUsuarios</from-outcome>
+            <to-view-id>/admin/listarUsuarios.xhtml</to-view-id>
             <redirect/>
         </navigation-case>
-    </navigation-rule>
-
-
- <navigation-rule>
-        <from-view-id>/login.xhtml</from-view-id>
-
+        
         <navigation-case>
-            <from-outcome>correcto</from-outcome>
-            <to-view-id>/correcto.xhtml</to-view-id>
+            <from-outcome>estadisticas</from-outcome>
+            <to-view-id>/admin/estadisticas.xhtml</to-view-id>
         </navigation-case>
-
+        
         <navigation-case>
-            <from-outcome>usuario</from-outcome>
-            <to-view-id>/correcto.xhtml</to-view-id>
-        </navigation-case>
-
-        <navigation-case>
-            <from-outcome>tecnico</from-outcome>
-            <to-view-id>/correcto.xhtml</to-view-id>
-        </navigation-case>
-
-        <navigation-case>
-            <from-outcome>Administrador</from-outcome>
-            <to-view-id>/correcto.xhtml</to-view-id>
+            <from-outcome>todasIncidencias</from-outcome>
+            <to-view-id>/admin/todasIncidencias.xhtml</to-view-id>
         </navigation-case>
     </navigation-rule>
 
